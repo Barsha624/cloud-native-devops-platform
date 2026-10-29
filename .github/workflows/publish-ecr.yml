@@ -1,0 +1,35 @@
+name: Publish image to ECR
+
+# Manual only. This never runs until you create the AWS resources with
+# Terraform (see docs/deployment.md) and set the repository variables below.
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write # lets GitHub request a short-lived OIDC token, no stored AWS keys
+  contents: read
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image tagged with the commit SHA
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+        run: |
+          IMAGE="${REGISTRY}/${REPOSITORY}:${GITHUB_SHA}"
+          docker build --build-arg APP_VERSION="${GITHUB_SHA}" -t "${IMAGE}" .
+          docker push "${IMAGE}"
+          echo "Pushed ${IMAGE}"

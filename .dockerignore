@@ -1,0 +1,30 @@
+.git
+.github
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.coverage
+htmlcov
+
+# Not needed inside the runtime image
+tests
+docs
+k8s
+terraform
+monitoring
+*.md
+pyproject.toml
+requirements-dev.txt
+
+# Never send secrets or state to the build context
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.tfstate
+*.tfstate.*
+*.tfvars

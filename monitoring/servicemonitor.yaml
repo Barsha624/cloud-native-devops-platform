@@ -1,0 +1,45 @@
+# Requires the Prometheus Operator CRDs from kube-prometheus-stack (see docs/deployment.md).
+# Apply only after the monitoring stack is installed:
+#   kubectl apply -f monitoring/servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: taskapi
+  namespace: taskapi
+  labels:
+    app: taskapi
+spec:
+  selector:
+    matchLabels:
+      app: taskapi
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: taskapi-alerts
+  namespace: taskapi
+spec:
+  groups:
+    - name: taskapi
+      rules:
+        - alert: TaskApiDown
+          expr: up{namespace="taskapi", service="taskapi"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "taskapi target is down"
+        - alert: TaskApiHighErrorRate
+          expr: |
+            sum(rate(http_requests_total{namespace="taskapi", status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{namespace="taskapi"}[5m])) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "More than 5% of taskapi requests are failing with 5xx"

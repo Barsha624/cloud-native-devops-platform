@@ -1,0 +1,18 @@
+[project]
+name = "taskapi"
+version = "0.1.0"
+description = "Small task-management API used to practise a full DevOps delivery lifecycle"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+# E/W: pycodestyle, F: pyflakes, I: import order, B: likely bugs, UP: modern syntax
+select = ["E", "W", "F", "I", "B", "UP"]

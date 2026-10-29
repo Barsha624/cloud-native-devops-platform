@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: taskapi
+  namespace: taskapi
+  labels:
+    app: taskapi
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: taskapi
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0 # never drop below the desired replica count during a rollout
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: taskapi
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: taskapi
+          image: taskapi:local # replaced by the images: block in kustomization.yaml
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: taskapi-config
+          env:
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: taskapi-secret
+                  key: API_KEY
+                  optional: true # the app runs without auth if the Secret is absent
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp # gunicorn writes small worker files here
+      volumes:
+        - name: tmp
+          emptyDir: {}

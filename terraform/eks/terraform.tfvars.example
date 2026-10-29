@@ -1,0 +1,3 @@
+kubernetes_version = "" # REQUIRED: fill in a currently supported EKS version
+admin_cidr         = "0.0.0.0/32" # REQUIRED: replace with your own public IP, for example x.x.x.x/32
+aws_region         = "ap-south-1"
