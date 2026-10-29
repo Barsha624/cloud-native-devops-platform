@@ -152,17 +152,5 @@ This README makes no claims about passing builds or running deployments. Generat
 - Image signing and an SBOM
 - Argo CD or Flux for GitOps deployment
 
-## Limitations
 
-- Tasks are stored in memory: lost on restart and different per replica (two replicas means two separate lists).
-- Authentication is a single shared API key, which is not suitable for real users.
-- Not load-tested and not production-ready.
-- The Docker, Kubernetes, Terraform and EKS parts have not been run end to end yet; see [docs/verification.md](docs/verification.md) for exactly what has and has not been checked.
 
-## License
-
-No license is included by default. If you want others to reuse the code, a permissive license such as MIT is a common choice for portfolio projects; `LICENSE` contains a template with placeholders for you to complete. Choose deliberately, and consult a lawyer if the legal effect matters to you.
-
-## Authorship note
-
-This project was built with AI assistance. Before presenting it as your own work, read and run every part, and be ready to explain it. The interview notes list what you should be able to do unaided.
